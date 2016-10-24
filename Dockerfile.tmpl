@@ -1,0 +1,43 @@
+
+FROM openjdk:JDK_VERSION_TAG
+
+# apply any OS updates just in case
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
+
+# ENV vars
+ENV LIQUIBASE_VERSION LIQUIBASE_VERSION_TAG
+ENV MYSQLCONN_VERSION MYSQLCONN_VERSION_TAG
+ENV VAULT_VERSION VAULT_VERSION_TAG
+
+# install vault
+RUN \
+ curl -sf -o vault.zip  https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_amd64.zip && \
+ unzip vault.zip -d /usr/local/bin/ && \
+ rm -f vault.zip
+
+# install liquibase
+RUN \
+  curl -sf -o liquibase.zip -L https://github.com/liquibase/liquibase/releases/download/liquibase-parent-${LIQUIBASE_VERSION}/liquibase-${LIQUIBASE_VERSION}-bin.zip && \
+  mkdir /opt/liquibase && \
+  unzip liquibase.zip -d /opt/liquibase && \
+  rm -f liquibase.zip && \
+  chmod +x /opt/liquibase/liquibase && \
+  ln -s /opt/liquibase/liquibase /usr/local/bin/
+
+# install mysql-connector
+RUN \
+  curl -sfL -o mysql-connector-java.zip http://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-${MYSQLCONN_VERSION}.zip && \
+  mkdir /opt/jdbc_drivers/ && \
+  unzip mysql-connector-java.zip -d /opt/jdbc_drivers/ && \
+  chmod +x /opt/jdbc_drivers/mysql-connector-java-${MYSQLCONN_VERSION}/mysql-connector-java-${MYSQLCONN_VERSION}-bin.jar && \
+  ln -s /opt/jdbc_drivers/mysql-connector-java-${MYSQLCONN_VERSION}/mysql-connector-java-${MYSQLCONN_VERSION}-bin.jar /opt/liquibase/lib/
+
+# add labels for easy identification
+# LABEL JAVA_VERSION=JAVA_VERSION_TAG
+LABEL JAVA_VERSION=$JAVA_VERSION
+LABEL LIQUIBASE_VERSION=$LIQUIBASE_VERSION
+LABEL MYSQLCONN_VERSION=$MYSQLCONN_VERSION
+LABEL VAULT_VERSION=$VAULT_VERSION
+
+# add generated Dockerfile for easy viewing
+ADD Dockerfile .
