@@ -8,6 +8,7 @@ RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 ENV LIQUIBASE_VERSION LIQUIBASE_VERSION_TAG
 ENV MYSQLCONN_VERSION MYSQLCONN_VERSION_TAG
 ENV VAULT_VERSION VAULT_VERSION_TAG
+ENV LIQUIBASE_HOME /opt/liquibase
 
 # install vault
 RUN \
@@ -29,11 +30,11 @@ RUN \
   curl -sfL -o mysql-connector-java.zip http://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-${MYSQLCONN_VERSION}.zip && \
   mkdir /opt/jdbc_drivers/ && \
   unzip mysql-connector-java.zip -d /opt/jdbc_drivers/ && \
+  rm -f mysql-connector-java.zip && \
   chmod +x /opt/jdbc_drivers/mysql-connector-java-${MYSQLCONN_VERSION}/mysql-connector-java-${MYSQLCONN_VERSION}-bin.jar && \
   ln -s /opt/jdbc_drivers/mysql-connector-java-${MYSQLCONN_VERSION}/mysql-connector-java-${MYSQLCONN_VERSION}-bin.jar /opt/liquibase/lib/
 
 # add labels for easy identification
-# LABEL JAVA_VERSION=JAVA_VERSION_TAG
 LABEL JAVA_VERSION=$JAVA_VERSION
 LABEL LIQUIBASE_VERSION=$LIQUIBASE_VERSION
 LABEL MYSQLCONN_VERSION=$MYSQLCONN_VERSION
@@ -41,3 +42,4 @@ LABEL VAULT_VERSION=$VAULT_VERSION
 
 # add generated Dockerfile for easy viewing
 ADD Dockerfile .
+ADD run.sh /usr/local/bin/
