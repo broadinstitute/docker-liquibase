@@ -5,13 +5,13 @@
 #  - JDK_VERSION
 #  - VAULT_VERSION
 #  - LIQUIBASE_VERSION
-#  - MYSQL-CONN_VERSION
+#  - MYSQLCONN_VERSION
 
 # If any of these environment vars are not set the build will exit with failure
 JDK_VERSION=${JDK_VERSION:-"8"}
 VAULT_VERSION=${VAULT_VERSION:-"0.7.0"}
 LIQUIBASE_VERSION=${LIQUIBASE_VERSION:-"3.5.3"}
-MYSQL-CONN_VERSION=${MYSQL-CONN_VERSION:-"5.1.40"}
+MYSQLCONN_VERSION=${MYSQLCONN_VERSION:-"5.1.40"}
 
 # the Dockerfile template is required to exist in this repo
 
@@ -37,12 +37,12 @@ sed -e "s;LIQUIBASE_VERSION_TAG;${LIQUIBASE_VERSION};" -e "s;MYSQLCONN_VERSION_T
 
 # build docker
 
-docker build -t ${REPO}:${BUILD_TAG}.${BUILD_NUM} .
+docker build -t ${REPO}:${BUILD_TAG}_${BUILD_NUM} .
 # need to check return status on build
 
 # rm Dockerfile after build
 rm -f Dockerfile
 
-docker tag ${REPO}:${BUILD_TAG}.${BUILD_NUM} ${REPO}:liquibase-${LIQUIBASE_VERSION}
+docker tag ${REPO}:${BUILD_TAG}_${BUILD_NUM} ${REPO}:liquibase-${LIQUIBASE_VERSION}
 
 
