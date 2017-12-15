@@ -43,6 +43,6 @@ docker build -t ${REPO}:${BUILD_TAG}_${BUILD_NUM} .
 # rm Dockerfile after build
 rm -f Dockerfile
 
-docker tag ${REPO}:${BUILD_TAG}_${BUILD_NUM} ${REPO}:liquibase-${LIQUIBASE_VERSION}
+docker tag ${REPO}:${BUILD_TAG}_${BUILD_NUM} ${REPO}:${LIQUIBASE_VERSION}
 
 
