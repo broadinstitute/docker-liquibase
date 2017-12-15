@@ -26,9 +26,11 @@ LOG_DIR=${LOG_DIR:-"/working"}
 LOG_LEVEL=${LOG_LEVEL:-"debug"}
 LOG_OPTS=${LOG_OPTS:-""}
 USE_SSL=${USE_SSL:-1}
+USE_RELATIVE=${USE_RELATIVE:-1}
 VAULT_TOKEN_FILE=${VAULT_TOKEN_FILE:-"/root/.vault-token"}
 VAULT_TOKEN=${VAULT_TOKEN:-""}
 JAVA_OPTS=${JAVA_OPTS:-""}
+LIQUIBASE_OPTS=${LIQUIBASE_OPTS:-""}
 
 if [ ! -z "${LOG_LEVEL}" ]
 then
@@ -58,5 +60,14 @@ echo "liquibase  --driver=com.mysql.jdbc.Driver ${LOG_OPTS} --changeLogFile=${CH
 cd ${CHGLOG_DIR}
 # make sure you can cd
 
-liquibase  --driver=com.mysql.jdbc.Driver ${LOG_OPTS} --changeLogFile=${CHGLOG_DIR}/changelog.xml --url="${DB_URL}" --username=${DB_USER} --password=${DB_PASSWORD}  migrate
+if [ "${USE_RELATIVE}" -ne 1 ]
+then
+    change_path="."
+else
+    change_path="${CHGLOG_DIR}"
+fi
+
+# need to add validation that changelog.xml exists
+
+liquibase  --driver=com.mysql.jdbc.Driver ${LIQUIBASE_OPTS} ${LOG_OPTS} --changeLogFile=${change_path}/changelog.xml --url="${DB_URL}" --username=${DB_USER} --password=${DB_PASSWORD}  migrate
 
