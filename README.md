@@ -1,8 +1,11 @@
 # docker-liquibase
 Dockerfile and built utility for creating Liquibase utility in a docker container
 
-Ex:
+BUILD:
 
+./build-docker.sh
+
+USAGE EXAMPLE:
 
 ENV=dev
 DB_PASSWORD=$(vault read -field=admin_password "<VAULTPATH>")
