@@ -26,13 +26,13 @@ DB_USER=metrics_admin
 
 ```
 docker run --rm --env-file=metrics.env \
+    -v <PATH-TO-CHANGELOG/SETS>:/working \
+    -e CHGLOG_FILE:/working/custom-changelog.xml \
 	-e ENV=${ENV} \
 	-e CHGLOG_DIR=${CHGLOG_DIR} \
 	-e DB_PASSWORD=${DB_PASSWORD} \
 	-e VAULT_ADDR=${VAULT_ADDR} \
-	-v <PATH-TO-CHANGELOG>:/changelog \
-	-v <PATH_CHANGESETS>:/changesets \
 	-v ${PWD}:/working \
 	-v ${HOME}/.vault-token:/root/.vault-token \
-	broadinstitute/liquibase:3.5.3 run.sh 
+	broadinstitute/liquibase:3.5.3 run.sh upgrade
 ```

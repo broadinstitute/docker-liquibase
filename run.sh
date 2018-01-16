@@ -5,14 +5,15 @@
 
 # this script will run a changeset manually
 
-# changesets should appear under the directory in the var CHGLOG_DIR
-# NOTE: you need to ensure that any path referenced by the changelog.xml is 
-#  resolveable inside docker.  Best practise is for changesets to be referenced
-#  using relative paths
+# changesets & migration files should be loaded to the working directory /working (or a custom working dir)
+# and should retain any relative directory structure
 
 # script 
 
 # todo check that environment vars are set
+
+# The liquibase action (i.e. update, migrate) should come in as the first parameter of this script
+ACTION=${1:-""}
 
 ENV=${ENV:-""}
 APP_PROJ=${APP_PROJ:-""}
@@ -21,16 +22,18 @@ DB_NAME=${DB_NAME:-"${APP_NAME}"}
 DB_HOST=${DB_HOST:-""}
 DB_USER=${DB_USER:-""}
 DB_PASSWORD=${DB_PASSWORD:-""}
-CHGLOG_DIR=${CHGLOG_DIR:-"/changesets"}
+WORKING_DIR=${WORKING_DIR:-"/working"}
+CHGLOG_FILE=${CHGLOG_FILE:-"/working/changelog.xml"}
+CHGSETS_DIR=${CHAGSETS_DIR:-"/working/changesets"}
 LOG_DIR=${LOG_DIR:-"/working"}
 LOG_LEVEL=${LOG_LEVEL:-"debug"}
 LOG_OPTS=${LOG_OPTS:-""}
 USE_SSL=${USE_SSL:-1}
-USE_RELATIVE=${USE_RELATIVE:-1}
 VAULT_TOKEN_FILE=${VAULT_TOKEN_FILE:-"/root/.vault-token"}
 VAULT_TOKEN=${VAULT_TOKEN:-""}
 JAVA_OPTS=${JAVA_OPTS:-""}
 LIQUIBASE_OPTS=${LIQUIBASE_OPTS:-""}
+
 
 if [ ! -z "${LOG_LEVEL}" ]
 then
@@ -52,22 +55,17 @@ fi
 
 # DB_USER=`vault read --field=admin_user "secret/dsde/${APP_PROJ}/${ENV}/${DB_NAME}/secrets"`
 # DB_PASSWORD=`vault read --field=admin_password "secret/dsde/${APP_PROJ}/${ENV}/${DB_NAME}/secrets"`
+cd ${WORKING_DIR}
 
-cd ${CHGLOG_DIR}
-# make sure you can cd
-
-if [ "${USE_RELATIVE}" -ne 1 ]
-then
-    change_path="."
+if [ -z "${ACTION}" ]; then
+    echo "Liquibase action not provided."
+    return 1
 else
-    change_path="${CHGLOG_DIR}"
+    echo "Running liquibase using the following command: (password hidden)"
+    echo "JAVAOPTS: ${JAVA_OPTS}"
+    echo "liquibase  --driver=com.mysql.jdbc.Driver ${LIQUIBASE_OPTS} ${LOG_OPTS} --changeLogFile=${CHGLOG_FILE} --url="${DB_URL}" --username=${DB_USER} --password=XXXXXXX  ${ACTION}"
+
+    # need to add validation that changelog.xml exists
+
+    liquibase  --driver=com.mysql.jdbc.Driver ${LIQUIBASE_OPTS} ${LOG_OPTS} --changeLogFile=${CHGLOG_FILE} --url="${DB_URL}" --username=${DB_USER} --password=${DB_PASSWORD}  ${ACTION}
 fi
-
-echo "Running liquibase using the following command: (password hidden)"
-echo "JAVAOPTS: ${JAVA_OPTS}"
-echo "liquibase  --driver=com.mysql.jdbc.Driver ${LIQUIBASE_OPTS} ${LOG_OPTS} --changeLogFile=${change_path}/changelog.xml --url="${DB_URL}" --username=${DB_USER} --password=XXXXXXX  migrate"
-
-# need to add validation that changelog.xml exists
-
-liquibase  --driver=com.mysql.jdbc.Driver ${LIQUIBASE_OPTS} ${LOG_OPTS} --changeLogFile=${change_path}/changelog.xml --url="${DB_URL}" --username=${DB_USER} --password=${DB_PASSWORD}  migrate
-
