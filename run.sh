@@ -53,10 +53,6 @@ fi
 # DB_USER=`vault read --field=admin_user "secret/dsde/${APP_PROJ}/${ENV}/${DB_NAME}/secrets"`
 # DB_PASSWORD=`vault read --field=admin_password "secret/dsde/${APP_PROJ}/${ENV}/${DB_NAME}/secrets"`
 
-echo "Running liquibase using the following command: (password hidden)"
-echo "JAVAOPTS: ${JAVA_OPTS}"
-echo "liquibase  --driver=com.mysql.jdbc.Driver ${LOG_OPTS} --changeLogFile=${CHGLOG_DIR}/changelog.xml --url="${DB_URL}" --username=${DB_USER} --password=XXXXXXX  migrate"
-
 cd ${CHGLOG_DIR}
 # make sure you can cd
 
@@ -66,6 +62,10 @@ then
 else
     change_path="${CHGLOG_DIR}"
 fi
+
+echo "Running liquibase using the following command: (password hidden)"
+echo "JAVAOPTS: ${JAVA_OPTS}"
+echo "liquibase  --driver=com.mysql.jdbc.Driver ${LIQUIBASE_OPTS} ${LOG_OPTS} --changeLogFile=${change_path}/changelog.xml --url="${DB_URL}" --username=${DB_USER} --password=XXXXXXX  migrate"
 
 # need to add validation that changelog.xml exists
 
