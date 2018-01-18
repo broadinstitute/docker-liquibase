@@ -23,12 +23,13 @@ DB_HOST=${DB_HOST:-""}
 DB_USER=${DB_USER:-""}
 DB_PASSWORD=${DB_PASSWORD:-""}
 WORKING_DIR=${WORKING_DIR:-"/working"}
-CHGLOG_FILE=${CHGLOG_FILE:-"/working/changelog.xml"}
-CHGSETS_DIR=${CHAGSETS_DIR:-"/working/changesets"}
+CHGLOG_FILE=${CHGLOG_FILE:-"changelog.xml"}
+CHGSETS_DIR=${CHAGSETS_DIR:-"changesets"}
 LOG_DIR=${LOG_DIR:-"/working"}
 LOG_LEVEL=${LOG_LEVEL:-"debug"}
 LOG_OPTS=${LOG_OPTS:-""}
 USE_SSL=${USE_SSL:-1}
+USE_COMMON_CERTS=${USE_COMMON_CERTS:-0}
 VAULT_TOKEN_FILE=${VAULT_TOKEN_FILE:-"/root/.vault-token"}
 VAULT_TOKEN=${VAULT_TOKEN:-""}
 JAVA_OPTS=${JAVA_OPTS:-""}
@@ -47,9 +48,15 @@ DB_URL="jdbc:mysql://${DB_HOST}:3306/${DB_NAME}"
 if [ "${USE_SSL}" -eq 1 ]
 then
   DB_URL="${DB_URL}?useSSL=true&requireSSL=true"
-  vault read --field=keystore "secret/dsde/${APP_PROJ}/${ENV}/${APP_NAME}/${DB_NAME}-mysql" | base64 -d > /tmp/keystore
-  vault read --field=truststore "secret/dsde/${APP_PROJ}/${ENV}/${APP_NAME}/${DB_NAME}-mysql" | base64 -d > /tmp/truststore
- JAVA_OPTS="${JAVA_OPTS} -Djavax.net.ssl.keyStore=/tmp/keystore -Djavax.net.ssl.keyStorePassword=changeit -Djavax.net.ssl.trustStore=/tmp/truststore -Djavax.net.ssl.trustStorePassword=changeit"
+  if [ "${USE_COMMON_CERTS}" -eq 1 ]
+  then
+    vault read --field=keystore "secret/dsde/${APP_PROJ}/${ENV}/common/mysql01" | base64 -d > /tmp/keystore
+    vault read --field=truststore "secret/dsde/${APP_PROJ}/${ENV}/common/mysql01" | base64 -d > /tmp/truststore
+  else
+    vault read --field=keystore "secret/dsde/${APP_PROJ}/${ENV}/${APP_NAME}/${DB_NAME}-mysql" | base64 -d > /tmp/keystore
+    vault read --field=truststore "secret/dsde/${APP_PROJ}/${ENV}/${APP_NAME}/${DB_NAME}-mysql" | base64 -d > /tmp/truststore
+  fi
+  JAVA_OPTS="${JAVA_OPTS} -Djavax.net.ssl.keyStore=/tmp/keystore -Djavax.net.ssl.keyStorePassword=changeit -Djavax.net.ssl.trustStore=/tmp/truststore -Djavax.net.ssl.trustStorePassword=changeit"
   export JAVA_OPTS
 fi
 
