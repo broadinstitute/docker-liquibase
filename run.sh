@@ -34,7 +34,7 @@ VAULT_TOKEN_FILE=${VAULT_TOKEN_FILE:-"/root/.vault-token"}
 VAULT_TOKEN=${VAULT_TOKEN:-""}
 JAVA_OPTS=${JAVA_OPTS:-""}
 LIQUIBASE_OPTS=${LIQUIBASE_OPTS:-""}
-
+SLEEP=${SLEEP:-0}
 
 if [ ! -z "${LOG_LEVEL}" ]
 then
@@ -73,6 +73,7 @@ else
     echo "liquibase  --driver=com.mysql.jdbc.Driver ${LIQUIBASE_OPTS} ${LOG_OPTS} --changeLogFile=${CHGLOG_FILE} --url="${DB_URL}" --username=${DB_USER} --password=XXXXXXX  ${ACTION}"
 
     # need to add validation that changelog.xml exists
-
+    echo "Sleeping for $SLEEP seconds..."
+    sleep $SLEEP
     liquibase  --driver=com.mysql.jdbc.Driver ${LIQUIBASE_OPTS} ${LOG_OPTS} --changeLogFile=${CHGLOG_FILE} --url="${DB_URL}" --username=${DB_USER} --password=${DB_PASSWORD}  ${ACTION}
 fi
