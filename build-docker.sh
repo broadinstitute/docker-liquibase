@@ -1,48 +1,50 @@
 #!/bin/bash
 
-# this script will construct the Dockerfile for this build based on 
-# the values for these environment vars:
-#  - JDK_VERSION
-#  - VAULT_VERSION
-#  - LIQUIBASE_VERSION
-#  - MYSQLCONN_VERSION
-
-# If any of these environment vars are not set the build will exit with failure
-JDK_VERSION=${JDK_VERSION:-"8"}
-VAULT_VERSION=${VAULT_VERSION:-"0.7.0"}
-LIQUIBASE_VERSION=${LIQUIBASE_VERSION:-"3.5.3"}
-MYSQLCONN_VERSION=${MYSQLCONN_VERSION:-"5.1.40"}
-
-# the Dockerfile template is required to exist in this repo
-
 # Docker Hub container name
 REPO="broadinstitute/liquibase"
 
-# build number hack
-BUILD_NUM=${BUILD_NUM:-0}
-BUILD_TAG=${BUILD_TAG:-"build"}
+# pull tags
+git pull --tags
 
-# TODO
-# check that all vars are set
+# GIT info
+GIT_COMMIT=$(git rev-parse HEAD)
+GIT_HASH=$(git rev-parse --short HEAD)
+# find all tags that match git commit hash
+GIT_TAGS=$(git show-ref --tags -d | grep -E "^${GIT_COMMIT}" | awk '{ print $2 }' | sed -e 's;refs/tags/;;')
+GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
-if [ -z "${JDK_VERSION}" -o -z "${VAULT_VERSION}" -o -z "${LIQUIBASE_VERSION}" -o -z "${MYSQLCONN_VERSION}" ]
-then
-    echo "ERROR: Must specify versions that will be part of build"
-    exit 1
-fi
+# timestamp
+BUILD_DATE=$(date +%Y%m%d_%H%M%S)
 
-# build Dockerfile from template
-
-sed -e "s;LIQUIBASE_VERSION_TAG;${LIQUIBASE_VERSION};" -e "s;MYSQLCONN_VERSION_TAG;${MYSQLCONN_VERSION};" -e "s;VAULT_VERSION_TAG;${VAULT_VERSION};" -e "s;JDK_VERSION_TAG;${JDK_VERSION};" < Dockerfile.tmpl > Dockerfile
+# add some additional labels to docker image
+echo "LABEL GIT_COMMIT=\"${GIT_COMMIT}\"" >> Dockerfile
+echo "LABEL GIT_BRANCH=\"${GIT_BRANCH}\"" >> Dockerfile
+echo "LABEL BUILD_DATE=\"${BUILD_DATE}\"" >> Dockerfile
 
 # build docker
-
-docker build -t ${REPO}:${BUILD_TAG}_${BUILD_NUM} .
+echo docker build -t ${REPO}:${GIT_HASH} .
 # need to check return status on build
 
-# rm Dockerfile after build
-rm -f Dockerfile
+docker push ${REPO}:${GIT_HASH}
+# need to check return status on build
 
-docker tag ${REPO}:${BUILD_TAG}_${BUILD_NUM} ${REPO}:${LIQUIBASE_VERSION}
+for addt_tags in ${GIT_TAGS} 
+do
+    echo docker tag ${REPO}:${GIT_HASH} ${REPO}:${addt_tags}
+    echo docker push ${REPO}:${addt_tags}
+    echo docker rmi ${REPO}:${addt_tags}
+done
+
+# tag based on branch if not master
+if [ "${GIT_BRANCH}" != "master" ]
+then
+    echo docker tag ${REPO}:${GIT_HASH} ${REPO}:${GIT_BRANCH}
+    echo docker push ${REPO}:${GIT_BRANCH}
+    echo docker rmi ${REPO}:${GIT_BRANCH}
+fi
+
+echo docker rmi ${REPO}:${GIT_HASH}
+
+   
 
 
