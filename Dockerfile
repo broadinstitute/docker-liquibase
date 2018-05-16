@@ -38,6 +38,3 @@ ADD run.sh /usr/local/bin/
 
 ENTRYPOINT [ "/usr/local/bin/run.sh" ]
 CMD [ "update" ]
-LABEL GIT_COMMIT="eccd33248e3234005c74066c6e36810faef2cf62"
-LABEL GIT_BRANCH="hf_new_run_script"
-LABEL BUILD_DATE="20180516_132349"

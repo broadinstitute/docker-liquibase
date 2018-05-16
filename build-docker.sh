@@ -17,34 +17,38 @@ GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 BUILD_DATE=$(date +%Y%m%d_%H%M%S)
 
 # add some additional labels to docker image
+echo "Adding additional LABELS to Dockerfile..."
 echo "LABEL GIT_COMMIT=\"${GIT_COMMIT}\"" >> Dockerfile
 echo "LABEL GIT_BRANCH=\"${GIT_BRANCH}\"" >> Dockerfile
 echo "LABEL BUILD_DATE=\"${BUILD_DATE}\"" >> Dockerfile
 
+echo "Building docker image..."
 # build docker
-echo docker build -t ${REPO}:${GIT_HASH} .
+docker build -t ${REPO}:${GIT_HASH} .
 # need to check return status on build
 
+echo "Pushing docker image to dockerhub"
 docker push ${REPO}:${GIT_HASH}
 # need to check return status on build
 
 for addt_tags in ${GIT_TAGS} 
 do
-    echo docker tag ${REPO}:${GIT_HASH} ${REPO}:${addt_tags}
-    echo docker push ${REPO}:${addt_tags}
-    echo docker rmi ${REPO}:${addt_tags}
+    echo "Creating additional tag: (${addt_tag}).."
+    docker tag ${REPO}:${GIT_HASH} ${REPO}:${addt_tags}
+    docker push ${REPO}:${addt_tags}
+    docker rmi ${REPO}:${addt_tags}
 done
 
 # tag based on branch if not master
 if [ "${GIT_BRANCH}" != "master" ]
 then
-    echo docker tag ${REPO}:${GIT_HASH} ${REPO}:${GIT_BRANCH}
-    echo docker push ${REPO}:${GIT_BRANCH}
-    echo docker rmi ${REPO}:${GIT_BRANCH}
+    echo "Creating branch tag: (${GIT_BRANCH}).."
+    docker tag ${REPO}:${GIT_HASH} ${REPO}:${GIT_BRANCH}
+    docker push ${REPO}:${GIT_BRANCH}
+    docker rmi ${REPO}:${GIT_BRANCH}
 fi
 
-echo docker rmi ${REPO}:${GIT_HASH}
+echo "Cleaning up built docker image"
+docker rmi ${REPO}:${GIT_HASH}
 
-   
-
-
+exit 0
