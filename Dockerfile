@@ -43,9 +43,7 @@ RUN \
 
 # add labels for easy identification
 LABEL LIQUIBASE_VERSION=${LIQUIBASE_VERSION_TAG}
-LABEL MYSQLCONN_VERSION=${MYSQL
-i
-CONN_VERSION_TAG}
+LABEL MYSQLCONN_VERSION=${MYSQLCONN_VERSION_TAG}
 
 # add generated Dockerfile for easy viewing
 ADD Dockerfile .
