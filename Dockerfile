@@ -28,6 +28,19 @@ RUN \
   chmod +x /opt/jdbc_drivers/mysql-connector-java-${MYSQLCONN_VERSION_TAG}/mysql-connector-java-${MYSQLCONN_VERSION_TAG}-bin.jar && \
   ln -s /opt/jdbc_drivers/mysql-connector-java-${MYSQLCONN_VERSION_TAG}/mysql-connector-java-${MYSQLCONN_VERSION_TAG}-bin.jar /usr/lib/liquibase-${LIQUIBASE_VERSION_TAG}/lib/
 
+# install postgres driver
+RUN \
+    curl -sfL -o /opt/jdbc_drivers/postgresql-42.2.9.jar http://jdbc.postgresql.org/download/postgresql-42.2.9.jar && \
+    chmod +x /opt/jdbc_drivers/postgresql-42.2.9.jar && \
+    ln -s /opt/jdbc_drivers/postgresql-42.2.9.jar /usr/lib/liquibase-${LIQUIBASE_VERSION_TAG}/lib/
+
+# install postgres socket factory
+RUN \
+  mkdir /opt/jdbc_sockets/ && \
+  curl -sfL -o /opt/jdbc_sockets/postgres-socket-factory-1.0.15-jar-with-dependencies.jar http://github.com/GoogleCloudPlatform/cloud-sql-jdbc-socket-factory/releases/download/v1.0.15/postgres-socket-factory-1.0.15-jar-with-dependencies.jar && \
+  chmod +x /opt/jdbc_sockets/postgres-socket-factory-1.0.15-jar-with-dependencies.jar && \
+  ln -s /opt/jdbc_sockets/postgres-socket-factory-1.0.15-jar-with-dependencies.jar /usr/lib/liquibase-${LIQUIBASE_VERSION_TAG}/lib/
+
 # add labels for easy identification
 LABEL LIQUIBASE_VERSION=${LIQUIBASE_VERSION_TAG}
 LABEL MYSQLCONN_VERSION=${MYSQLCONN_VERSION_TAG}

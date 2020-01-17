@@ -17,6 +17,8 @@ ACTION=${1:-""}
 
 DB_NAME=${DB_NAME:-""}
 DB_HOST=${DB_HOST:-""}
+DB_SUBPROTOCOL=${DB_SUBPROTOCOL:-"mysql"}
+DB_DRIVER=${DB_DRIVER:-"com.mysql.jdbc.Driver"}
 DB_USER=${DB_USER:-""}
 DB_PASSWORD=${DB_PASSWORD:-""}
 WORKING_DIR=${WORKING_DIR:-"/working"}
@@ -36,7 +38,7 @@ then
    LOG_OPTS="--logLevel=${LOG_LEVEL} --logFile=${LOG_DIR}/log.out"
 fi
 
-DB_URL="jdbc:mysql://${DB_HOST}:3306/${DB_NAME}"
+DB_URL="jdbc:${DB_SUBPROTOCOL}://${DB_HOST}:3306/${DB_NAME}"
 # add SSL if set
 
 if [ "${USE_SSL}" -eq 1 ]
@@ -52,10 +54,10 @@ if [ -z "${ACTION}" ]; then
 else
     echo "Running liquibase using the following command: (password hidden)"
     echo "JAVAOPTS: ${JAVA_OPTS}"
-    echo "liquibase  --driver=com.mysql.jdbc.Driver ${LIQUIBASE_OPTS} ${LOG_OPTS} --changeLogFile=${CHGLOG_FILE} --url="${DB_URL}" --username=${DB_USER} --password=XXXXXXX  ${ACTION}"
+    echo "liquibase  --driver=${DB_DRIVER} ${LIQUIBASE_OPTS} ${LOG_OPTS} --changeLogFile=${CHGLOG_FILE} --url="${DB_URL}" --username=${DB_USER} --password=XXXXXXX  ${ACTION}"
 
     # need to add validation that changelog.xml exists
     echo "Sleeping for $SLEEP seconds..."
     sleep $SLEEP
-    liquibase  --driver=com.mysql.jdbc.Driver ${LIQUIBASE_OPTS} ${LOG_OPTS} --changeLogFile=${CHGLOG_FILE} --url="${DB_URL}" --username=${DB_USER} --password=${DB_PASSWORD}  ${ACTION}
+    liquibase  --driver=${DB_DRIVER} ${LIQUIBASE_OPTS} ${LOG_OPTS} --changeLogFile=${CHGLOG_FILE} --url="${DB_URL}" --username=${DB_USER} --password=${DB_PASSWORD}  ${ACTION}
 fi
