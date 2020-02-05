@@ -9,14 +9,8 @@ job_defaults: &job_defaults
     image: circleci/classic:latest
 
 jobs:
-  test:
+  testjob:
     <<: *job_defaults
     steps:
       - checkout
 
-
-workflows:
-  version: 2
-  test:
-    jobs:
-      test
